@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.CustomerDao">
+
+
+    <insert id="addCustomerDao">
+        INSERT INTO
+            customer(created_by,updated_by,delete_status,user_Id)
+        VALUE
+            (#{createdBy},#{createdBy},#{deleteStatus},#{userId})
+    </insert>
+    <update id="addBalance">
+        UPDATE
+            customer
+        SET
+            customer_balance = customer_balance+#{amounts}
+        WHERE
+            user_id = #{userId}
+    </update>
+    <update id="updateInfo">
+        UPDATE
+            customer
+        SET
+            updated_by = #{userId},
+            customer_name = #{name},
+            customer_phone_number = #{phoneNumber}
+        WHERE
+            user_id = #{userId}
+    </update>
+    <select id="getInfo" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            customer_name name,
+            customer_phone_number phoneNumber,
+            customer_balance balance
+        FROM
+            customer
+        WHERE
+            user_id = #{userId}
+    </select>
+</mapper>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.PageTableDao">
+
+    <insert id="addPage">
+        INSERT INTO
+            sys_permission
+        VALUES
+            (#{id1},#{menuCode},#{menuName},#{pc1},"列表",1),
+            (#{id2},#{menuCode},#{menuName},#{pc2},"新增",2),
+            (#{id3},#{menuCode},#{menuName},#{pc3},"修改",2)
+    </insert>
+
+    <delete id="deletePageTable">
+        DELETE FROM
+            sys_permission
+        WHERE
+            menu_code=#{menuCode} AND menu_name=#{menuName}
+    </delete>
+
+
+    <select id="countPageTable" resultType="java.lang.Integer">
+        SELECT
+	        COUNT(1)
+        FROM(
+	        SELECT
+                menu_code menuCode,
+                menu_name menuName
+            FROM
+                sys_permission
+            WHERE
+                1=1
+            GROUP BY menu_code, menu_name) b
+    </select>
+
+    <select id="listPageTable" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            menu_code menuCode,
+            menu_name menuName
+        FROM
+            sys_permission
+        WHERE
+            1=1
+        GROUP BY menu_code, menu_name
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+    <select id="isCodeOrNameExist" resultType="java.lang.Integer">
+        SELECT
+            COUNT(*)
+        FROM
+            sys_permission
+        WHERE
+            menu_code = #{menuCode} OR menu_name = #{menuName}
+    </select>
+    <select id="getMaxId" resultType="java.lang.Integer">
+        SELECT
+            id
+        FROM
+            sys_permission
+        ORDER BY
+            id DESC
+        LIMIT   1
+    </select>
+    <select id="doSearch" resultType="java.lang.Integer">
+        SELECT
+	        COUNT(1)
+        FROM(
+	        SELECT
+                menu_code menuCode,
+                menu_name menuName
+            FROM
+                sys_permission
+            WHERE
+                menu_code = #{search}
+            GROUP BY menu_code, menu_name) b
+    </select>
+    <select id="listDoSearch" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            menu_code menuCode,
+            menu_name menuName
+        FROM
+            sys_permission
+        WHERE
+            1=1
+            <if test="search!=null">
+                AND menu_code = #{search}
+            </if>
+        GROUP BY menu_code, menu_name
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+
+
+</mapper>
