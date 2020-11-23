@@ -7,11 +7,11 @@
           </el-input>
           </el-form-item>
           <el-form-item>
-          <el-button type="primary" icon="plus" @click="getList()" v-if="hasPerm('goodsCategory:list')">查 询
+          <el-button type="primary" icon="plus" @click="getList()" v-if="hasPerm('goodsManage:list')">查 询
           </el-button>
           </el-form-item>
           <el-form-item>
-          <el-button type="primary" icon="plus" @click="showCreate" v-if="hasPerm('goodsCategory:add')">新 增
+          <el-button type="primary" icon="plus" @click="showCreate" v-if="hasPerm('goodsManage:add')">新 增
           </el-button>
         </el-form-item>
       </el-form>
@@ -23,14 +23,18 @@
           <span v-text="getIndex(scope.$index)"> </span>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="categoryName" label="名称" style="width: 30px;"></el-table-column>
-      <el-table-column align="center" prop="categoryBrief" label="描述" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="name" label="名称" style="width: 30px;"></el-table-column>
+      <el-table-column align="center" prop="price" label="单价" style="width: 30px;"></el-table-column>
+      <el-table-column align="center" prop="numbers" label="库存数量" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="GoodsName" label="商品种类" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="saleStatus" label="商品状态" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="brief" label="商品简介" style="width: 90px;"></el-table-column>
       <!-- <el-table-column align="center" label="创建时间" width="170">
         <template slot-scope="scope">
           <span>{{scope.row.createTime}}</span>
         </template>
       </el-table-column> -->
-      <el-table-column align="center" label="管理" width="200" v-if="hasPerm('goodsCategory:update')">
+      <el-table-column align="center" label="管理" width="200" v-if="hasPerm('goodsManage:update')">
         <template slot-scope="scope" >
           <el-button type="primary" icon="edit" @click="showUpdate(scope.$index)">修 改</el-button>
           <el-button type="danger" icon="edit" @click="showDelete(scope.$index)">删 除</el-button>
@@ -49,12 +53,12 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form v-if="dialogStatus=='create'||dialogStatus=='update'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
               style='width: 600px; margin-left:50px;'>
-        <el-form-item label="名称" prop="categoryName">
-          <el-input type="text" v-model="tempTable.categoryName" style="width: 250px;">
+        <el-form-item label="名称" prop="GoodsName">
+          <el-input type="text" v-model="tempTable.GoodsName" style="width: 250px;">
           </el-input>
         </el-form-item>
-        <el-form-item label="简介" prop="categoryBrief">
-          <el-input type="text" v-model="tempTable.categoryBrief" style="width: 250px;">
+        <el-form-item label="简介" prop="GoodsBrief">
+          <el-input type="text" v-model="tempTable.GoodsBrief" style="width: 250px;">
           </el-input>
         </el-form-item>
         <p style="color:#848484;" v-if="dialogStatus=='create'"><font color="#ff0000">*</font>为新增类目的必填信息</p>
@@ -63,9 +67,9 @@
       <el v-if="dialogStatus=='delete'">确认删除?</el>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button v-if="dialogStatus=='create'" type="success" @click="createCategory">创 建</el-button>
-        <el-button v-else-if="dialogStatus=='update'" type="success" @click="updateCategory">更 新</el-button>
-        <el-button type="danger" v-else @click="deleteCategory">删 除</el-button>
+        <el-button v-if="dialogStatus=='create'" type="success" @click="createGoods">创 建</el-button>
+        <el-button v-else-if="dialogStatus=='update'" type="success" @click="updateGoods">更 新</el-button>
+        <el-button type="danger" v-else @click="deleteGoods">删 除</el-button>
       </div>
     </el-dialog>
   </div>
@@ -95,8 +99,8 @@
           delete: '删除类目'
         },
         tempTable: {
-          categoryBrief: "",
-          categoryName: "",
+          GoodsBrief: "",
+          GoodsName: "",
           id:"",
         }
       }
@@ -106,13 +110,13 @@
     },
     methods: {
       getList() {
-        //查询列表
-        if (!this.hasPerm('goodsCategory:list')) {
+        //查询商品
+        if (!this.hasPerm('goodsManage:list')) {
           return
         }
         this.listLoading = true;
         this.api({
-          url: "/goodsCategory/getAllCategories",
+          url: "/goodsManage/getGoodsList",
           method: "get",
           params: this.listQuery
         }).then(data => {
@@ -142,8 +146,8 @@
       },
       showCreate() {
         //显示新增对话框
-        this.tempTable.categoryName = "";
-        this.tempTable.categoryBrief = "";
+        this.tempTable.GoodsName = "";
+        this.tempTable.GoodsBrief = "";
         this.tempTable.id = "";
         this.dialogStatus = "create";
         this.dialogFormVisible = true;
@@ -156,16 +160,16 @@
       },
       showUpdate($index) {
         //显示修改对话框
-        this.tempTable.categoryBrief = this.list[$index].categoryBrief;
-        this.tempTable.categoryName = this.list[$index].categoryName;
+        this.tempTable.GoodsBrief = this.list[$index].GoodsBrief;
+        this.tempTable.GoodsName = this.list[$index].GoodsName;
         this.tempTable.id = this.list[$index].id;
         this.dialogStatus = "update";
         this.dialogFormVisible = true
       },
-      createCategory() {
+      createGoods() {
         //保存新菜单
         this.api({
-          url: "/goodsCategory/addCategory",
+          url: "/goodsManage/addGoods",
           method: "post",
           data: this.tempTable
         }).then(() => {
@@ -174,10 +178,10 @@
           this.$message.success("类目添加成功");
         });
       },
-      updateCategory() {
+      updateGoods() {
         //更新类目
         this.api({
-          url: "/goodsCategory/updateCategory",
+          url: "/goodsManage/updateGoods",
           method: "post",
           data: this.tempTable
         }).then(() => {
@@ -186,10 +190,10 @@
           this.$message.success("类目修改成功");
         });
       },
-      deleteCategory() {
+      deleteGoods() {
         //删除类目
         this.api({
-          url: "/goodsCategory/deleteCategory",
+          url: "/goodsManage/deleteGoods",
           method: "post",
           data: this.tempTable
         }).then(() => {
@@ -209,7 +213,7 @@
       //     return
       //   }
       //   this.api({
-      //     url: "/goodsCategory/searchQuery",
+      //     url: "/goodsManage/searchQuery",
       //     method: "get",
       //     params: this.listQuery
       //   }).then(data => {

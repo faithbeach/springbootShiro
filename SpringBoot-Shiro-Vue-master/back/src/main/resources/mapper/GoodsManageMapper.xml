@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.GoodsManageDao">
+
+
+    <select id="listGoods" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            m.goods_name        name,
+            m.goods_price       price,
+            m.goods_numbers     numbers,
+            c.category_name     categoryName,
+            s.goods_status_name saleStatus,
+            m.goods_brief       brief,
+            m.id                id
+        FROM
+            goods_manage m
+        JOIN
+            goods_category  c   ON  m.goods_category_id = c.id
+        JOIN
+            status_code_name s ON m.goods_sale_status   =   s.goods_status_code
+        WHERE
+            m.business_id = #{userId}
+        AND m.delete_status = "1"
+    </select>
+    <select id="countGoods" resultType="java.lang.Integer">
+        SELECT
+            COUNT(1)
+        FROM
+            goods_manage
+        WHERE
+            business_id = #{userId}
+        AND delete_status = "1"
+    </select>
+</mapper>
