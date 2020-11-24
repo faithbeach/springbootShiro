@@ -7,7 +7,7 @@
           </el-input>
           </el-form-item>
           <el-form-item>
-          <el-button type="primary" icon="plus" @click="getList()" v-if="hasPerm('goodsManage:list')">查 询
+          <el-button type="primary" icon="plus" @click="getList" v-if="hasPerm('goodsManage:list')">查 询
           </el-button>
           </el-form-item>
           <el-form-item>
@@ -24,9 +24,9 @@
         </template>
       </el-table-column>
       <el-table-column align="center" prop="name" label="名称" style="width: 30px;"></el-table-column>
-      <el-table-column align="center" prop="price" label="单价" style="width: 30px;"></el-table-column>
+      <el-table-column align="center" prop="price" label="单价(元)" style="width: 30px;"></el-table-column>
       <el-table-column align="center" prop="numbers" label="库存数量" style="width: 90px;"></el-table-column>
-      <el-table-column align="center" prop="GoodsName" label="商品种类" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="categoryName" label="商品种类" style="width: 90px;"></el-table-column>
       <el-table-column align="center" prop="saleStatus" label="商品状态" style="width: 90px;"></el-table-column>
       <el-table-column align="center" prop="brief" label="商品简介" style="width: 90px;"></el-table-column>
       <!-- <el-table-column align="center" label="创建时间" width="170">
@@ -53,16 +53,38 @@
     <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form v-if="dialogStatus=='create'||dialogStatus=='update'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
               style='width: 600px; margin-left:50px;'>
-        <el-form-item label="名称" prop="GoodsName">
-          <el-input type="text" v-model="tempTable.GoodsName" style="width: 250px;">
-          </el-input>
+        <el-form-item label="名称" prop="name">
+          <el-input type="text" v-model="tempTable.name" style="width: 250px;"/>
         </el-form-item>
-        <el-form-item label="简介" prop="GoodsBrief">
-          <el-input type="text" v-model="tempTable.GoodsBrief" style="width: 250px;">
-          </el-input>
+        <el-form-item label="单价" prop="price">
+          <el-input type="text" v-model="tempTable.price" style="width: 250px;"/>
         </el-form-item>
-        <p style="color:#848484;" v-if="dialogStatus=='create'"><font color="#ff0000">*</font>为新增类目的必填信息</p>
-        <p style="color:#848484;" v-else><font color="#ff0000">*</font>为更新类目的必填信息</p>
+        <el-form-item label="库存数量" prop="numbers">
+          <el-input type="text" v-model="tempTable.numbers" style="width: 250px;"/>
+        </el-form-item>
+        <el-form-item label="商品类型" prop="categoryName">
+          <el-select v-model="tempTable.categoryId" placeholder="请选择">
+            <el-option
+              v-for="item in categoryList"
+              :key="item.id"
+              :label="item.categoryName"
+              :value="item.id">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品状态" prop="statusCode">
+          <el-select v-model="tempTable.statusCode" placeholder="请选择">
+            <el-option
+              v-for="item in statusList"
+              :key="item.code"
+              :label="item.name"
+              :value="item.code">
+            </el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="简介" prop="brief">
+          <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" placeholder="请提供一个简单的介绍" v-model="tempTable.brief" style="width: 250px;"/>
+        </el-form-item>
       </el-form>
       <el v-if="dialogStatus=='delete'">确认删除?</el>
       <div slot="footer" class="dialog-footer">
@@ -99,16 +121,38 @@
           delete: '删除类目'
         },
         tempTable: {
-          GoodsBrief: "",
-          GoodsName: "",
-          id:"",
-        }
+          name: "",
+          price: "",
+          numbers: "",
+          categoryId: "",
+          statusCode: "",
+          brief: "",
+          id: "",
+        },
+        categoryList: [],
+        statusList: [],
       }
     },
     created() {
       this.getList();
+      this.getCategoryList();
     },
     methods: {
+      getCategoryList() {
+        //查询商品
+        if (!this.hasPerm('goodsCategory:list')) {
+          return
+        }
+        this.listLoading = true;
+        this.api({
+          url: "/goodsCategory/getAllCategories",
+          method: "get",
+          params: this.listQuery
+        }).then(data => {
+          this.listLoading = false;
+          this.categoryList = data.list;
+        })
+      },
       getList() {
         //查询商品
         if (!this.hasPerm('goodsManage:list')) {
@@ -122,6 +166,7 @@
         }).then(data => {
           this.listLoading = false;
           this.list = data.list;
+          this.statusList = data.statusList;
           this.totalCount = data.totalCount;
         })
       },
@@ -146,22 +191,36 @@
       },
       showCreate() {
         //显示新增对话框
-        this.tempTable.GoodsName = "";
-        this.tempTable.GoodsBrief = "";
+        this.tempTable.name = "";
+        this.tempTable.price = "";
+        this.tempTable.numbers = "";
+        this.tempTable.categoryId = "";
+        this.tempTable.statusCode = "";
+        this.tempTable.brief = "";
         this.tempTable.id = "";
         this.dialogStatus = "create";
         this.dialogFormVisible = true;
       },
       showDelete($index) {
         //显示删除对话框
+        this.tempTable.name = "";
+        this.tempTable.price = "";
+        this.tempTable.numbers = "";
+        this.tempTable.categoryId = "";
+        this.tempTable.statusCode = "";
+        this.tempTable.brief = "";
         this.tempTable.id = this.list[$index].id;
         this.dialogStatus = "delete";
         this.dialogFormVisible = true
       },
       showUpdate($index) {
         //显示修改对话框
-        this.tempTable.GoodsBrief = this.list[$index].GoodsBrief;
-        this.tempTable.GoodsName = this.list[$index].GoodsName;
+        this.tempTable.name = this.list[$index].name;
+        this.tempTable.price = this.list[$index].price;
+        this.tempTable.numbers = this.list[$index].numbers;
+        this.tempTable.categoryId = this.list[$index].categoryId;
+        this.tempTable.statusCode = this.list[$index].statusId;
+        this.tempTable.brief = this.list[$index].brief;
         this.tempTable.id = this.list[$index].id;
         this.dialogStatus = "update";
         this.dialogFormVisible = true
@@ -175,7 +234,7 @@
         }).then(() => {
           this.getList();
           this.dialogFormVisible = false;
-          this.$message.success("类目添加成功");
+          this.$message.success("商品添加成功");
         });
       },
       updateGoods() {
@@ -187,7 +246,7 @@
         }).then(() => {
           this.getList();
           this.dialogFormVisible = false;
-          this.$message.success("类目修改成功");
+          this.$message.success("商品修改成功");
         });
       },
       deleteGoods() {
@@ -199,7 +258,7 @@
         }).then(() => {
           this.getList();
           this.dialogFormVisible = false;
-          this.$message.success("类目删除成功");
+          this.$message.success("商品删除成功");
         })
       },
       // doSearch(){

@@ -2,6 +2,7 @@ package com.heeexy.example.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.heeexy.example.dao.GoodsCategoryDao;
+import com.heeexy.example.dao.GoodsManageDao;
 import com.heeexy.example.service.GoodsCategoryService;
 import com.heeexy.example.util.CommonUtil;
 import com.heeexy.example.util.constants.ErrorEnum;
@@ -16,6 +17,9 @@ public class GoodsCategoryServiceImpl implements GoodsCategoryService {
 
     @Autowired
     private GoodsCategoryDao goodsCategoryDao;
+
+    @Autowired
+    private GoodsManageDao goodsManageDao;
 
 
     @Override
@@ -59,6 +63,12 @@ public class GoodsCategoryServiceImpl implements GoodsCategoryService {
 
     @Override
     public JSONObject deleteCategory(JSONObject requestJson) {
+        //实现类目与商品的逻辑外键
+        JSONObject categoryId = new JSONObject();
+        categoryId.put("categoryCode",requestJson.getIntValue("id"));//区分categoryId 等价于其值
+        categoryId.put("userId",CommonUtil.getUserId());
+        if(goodsManageDao.queryExistGoods(categoryId)>0)
+            return CommonUtil.errorJson(ErrorEnum.E_30010);
         requestJson.put("userId",CommonUtil.getUserId());
         goodsCategoryDao.deleteCategory(requestJson);
         return CommonUtil.successJson();

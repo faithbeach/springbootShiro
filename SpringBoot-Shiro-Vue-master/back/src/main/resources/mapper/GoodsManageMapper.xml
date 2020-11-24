@@ -2,7 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.heeexy.example.dao.GoodsManageDao">
-
+    <insert id="addGoods">
+        INSERT INTO
+            goods_manage(
+                goods_name,goods_price,goods_numbers,goods_category_id,goods_sale_status,
+                <if test="brief!=null">
+                    goods_brief,
+                </if>
+            delete_status,business_id,created_by,updated_by)
+        VALUE
+            (#{name},#{price},#{numbers},#{categoryId},#{statusCode},
+            <if test="brief!=null">
+                #{brief},
+            </if>
+            "1",#{userId},#{userId},#{userId})
+    </insert>
+    <update id="updateGoods">
+        UPDATE
+            goods_manage
+        SET
+            goods_name          =   #{name},
+            goods_price         =   #{price},
+            goods_numbers       =   #{numbers},
+            goods_brief         =   #{brief},
+            goods_category_id   =   #{categoryId},
+            goods_sale_status   =   #{statusCode},
+            updated_by          =   #{userId}
+        WHERE
+            id  =   #{id}
+    </update>
+    <update id="deleteGoods">
+        UPDATE
+            goods_manage
+        SET
+            delete_status   =   2,
+            updated_by      =   #{userId}
+        WHERE
+            id = #{id}
+        AND business_id=#{userId}
+    </update>
 
     <select id="listGoods" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
@@ -12,16 +50,24 @@
             c.category_name     categoryName,
             s.goods_status_name saleStatus,
             m.goods_brief       brief,
-            m.id                id
+            m.id                id,
+            m.goods_category_id categoryId,
+            m.goods_sale_status statusId
         FROM
             goods_manage m
         JOIN
-            goods_category  c   ON  m.goods_category_id = c.id
+            goods_category      c   ON  m.goods_category_id =   c.id
         JOIN
-            status_code_name s ON m.goods_sale_status   =   s.goods_status_code
+            status_code_name    s   ON  m.goods_sale_status =   s.goods_status_code
         WHERE
             m.business_id = #{userId}
         AND m.delete_status = "1"
+        <if test="search!=''">
+        AND (m.goods_name LIKE concat("%",#{search},"%")
+        OR m.goods_brief LIKE concat("%",#{search},"%")
+        OR c.category_name LIKE concat("%",#{search},"%"))
+        </if>
+        LIMIT #{offSet}, #{pageRow}
     </select>
     <select id="countGoods" resultType="java.lang.Integer">
         SELECT
@@ -31,5 +77,30 @@
         WHERE
             business_id = #{userId}
         AND delete_status = "1"
+    </select>
+    <select id="listStatus" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            goods_status_code   code,
+            goods_status_name   name
+        FROM
+            status_code_name
+    </select>
+    <select id="queryExistGoods" resultType="java.lang.Integer">
+        SELECT
+            COUNT(1)
+        FROM
+            goods_manage
+        WHERE
+            delete_status=1
+        AND business_id=#{userId}
+        <if test="name!=null">
+        AND goods_name=#{name}
+        </if>
+        <if test="categoryCode!=null">
+            AND goods_category_id=#{categoryCode}
+        </if>
+        <if test="id!=null">
+            AND id!=#{id}
+        </if>
     </select>
 </mapper>
