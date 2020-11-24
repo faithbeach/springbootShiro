@@ -60,7 +60,7 @@
         <p style="color:#848484;" v-if="dialogStatus=='create'"><font color="#ff0000">*</font>为新增类目的必填信息</p>
         <p style="color:#848484;" v-else><font color="#ff0000">*</font>为更新类目的必填信息</p>
       </el-form>
-      <el v-if="dialogStatus=='delete'">确认删除?</el>
+      <el-h3 v-if="dialogStatus=='delete'">确认删除?</el-h3>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button v-if="dialogStatus=='create'" type="success" @click="createCategory">创 建</el-button>
