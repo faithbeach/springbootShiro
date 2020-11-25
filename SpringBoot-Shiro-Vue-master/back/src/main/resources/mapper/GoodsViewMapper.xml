@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.GoodsViewDao">
+
+    <select id="countGoods" resultType="java.lang.Integer">
+        SELECT COUNT(1)
+        FROM
+            (SELECT
+                m.goods_name
+            FROM
+                goods_manage m
+            WHERE m.delete_status = "1"
+            ORDER BY m.goods_price) b
+    </select>
+    <select id="listGoods" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            m.goods_name		                            goodsName,
+            m.id					                        goodsId,
+            m.goods_price		                            goodsPrice,
+            m.goods_brief		                            goodsBrief,
+            m.business_id		                            businessId,
+            b.business_name	                                businessName,
+            TIME_FORMAT(b.business_open_time,"%H:%i")       openTime,
+            TIME_FORMAT(b.business_close_time,"%H:%i")      closeTime
+        FROM
+            goods_manage m
+        JOIN business b ON m.business_id=b.user_id
+        WHERE m.delete_status = "1"
+        ORDER BY m.goods_price
+        LIMIT #{offSet}, #{pageRow}
+    </select>
+</mapper>
