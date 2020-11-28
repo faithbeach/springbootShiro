@@ -17,13 +17,19 @@
               highlight-current-row>
       <el-table-column align="center" label="序号" width="80">
         <template slot-scope="scope">
-          <span v-text="getIndex(scope.$index)"> </span>
+          <span v-text="getIndex(scope.$index)"></span>
         </template>
       </el-table-column>
       <el-table-column align="center" prop="goodsName" label="商品名" style="width: 30px;"></el-table-column>
       <el-table-column align="center" prop="goodsPrice" label="单价(元)" style="width: 90px;"></el-table-column>
       <el-table-column align="center" prop="goodsBrief" label="简介" style="width: 90px;"></el-table-column>
-      <el-table-column align="center" prop="businessName" label="商店名" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" label="商店名" style="width: 90px;">
+        <template slot-scope="scope">
+        <router-link :to="{ name: '浏览商家信息', params: { msgId: scope.row.businessId }}">
+            {{scope.row.businessName}}
+        </router-link>
+        </template>
+      </el-table-column>
       <el-table-column align="center" prop="openTime" label="营业状态" style="width: 90px;"></el-table-column>
       <el-table-column align="center" prop="closeTime" label="营业状态" style="width: 90px;"></el-table-column>
       <!-- <el-table-column align="center" label="创建时间" width="170">

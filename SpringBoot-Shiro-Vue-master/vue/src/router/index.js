@@ -84,6 +84,14 @@ export const asyncRouterMap = [
         meta: {title: '顾客信息', icon: 'example'},
         menu: 'customerInfo'
       },
+      {
+        path: 'viewBusiness',
+        name: '浏览商家信息',
+        component: _import('information/customer/viewBusiness'),
+        meta: {title: '浏览商家信息', icon: 'example'},
+        menu: 'viewBusiness',
+        hidden: true,
+      },
     ]
   },
   {

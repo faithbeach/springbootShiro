@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.ViewBusinessDao">
+
+    <select id="getBusinessById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            business_name                               name,
+            business_phone                              phoneNumber,
+            business_address                            address,
+            business_brief                              brief,
+            TIME_FORMAT(business_open_time,"%H:%i")     openTime,
+            TIME_FORMAT(business_close_time,"%H:%i")    closeTime
+        FROM
+            business
+        WHERE
+            user_id = #{msgBusinessId}
+    </select>
+</mapper>
+
