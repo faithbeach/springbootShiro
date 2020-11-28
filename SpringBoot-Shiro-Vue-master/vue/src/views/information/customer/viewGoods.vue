@@ -3,13 +3,22 @@
     <div class="filter-container">
       <el-form :model="listQuery" :inline="true">
         <el-form-item>
-          <el-input type="text" v-model="listQuery.search.inputText" style="width: 250px;" placeholder="请输入查询内容">
+          <el-input type="text" v-model="listQuery.searchText" style="width: 250px;" placeholder="请输入查询内容">
           </el-input>
-          </el-form-item>
-          <el-form-item>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" icon="plus" @click="getList()" v-if="hasPerm('viewGoods:list')">查 询
           </el-button>
-          </el-form-item>
+        </el-form-item>
+        <el-form-item label="商品类型" prop="categoryName">
+          <el-select v-model="listQuery.select" placeholder="请选择" @change="getCategoryGoods()">
+            <el-option
+              v-for="item in categoryList"
+              :key="item.categoryName"
+              :label="item.categoryName"
+              :value="item.categoryName">
+            </el-option>
+          </el-select>
         </el-form-item>
       </el-form>
     </div>
@@ -53,7 +62,7 @@
       :page-sizes="[10, 20, 50, 100]"
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
-    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+    <!-- <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
       <el-form v-if="dialogStatus=='create'||dialogStatus=='update'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
               style='width: 600px; margin-left:50px;'>
         <el-form-item label="名称" prop="categoryName">
@@ -74,7 +83,7 @@
         <el-button v-else-if="dialogStatus=='update'" type="success" @click="updateCategory">更 新</el-button>
         <el-button type="danger" v-else @click="deleteCategory">删 除</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 <script>
@@ -87,9 +96,11 @@
         listQuery: {
           pageNum: 1,//页码
           pageRow: 10,//每页条数
-          search: {
-            inputText: "",
-          },
+          searchText: "",
+          select: "",
+        },
+        temp: {
+          select: "全部",
         },
         dialogStatus: 'create',
         dialogFormVisible: false,
@@ -102,10 +113,13 @@
           categoryBrief: "",
           categoryName: "",
           id:"",
-        }
+        },
+        categoryList: [],
       }
     },
     created() {
+      this.listQuery.select = "全部";
+      this.temp.select = "全部"
       this.getList();
     },
     methods: {
@@ -122,8 +136,14 @@
         }).then(data => {
           this.listLoading = false;
           this.list = data.list;
+          this.categoryList = data.categoryList;
+          this.listQuery.select = this.temp.select;
           this.totalCount = data.totalCount;
         })
+      },
+      getCategoryGoods(){
+        this.temp.select = this.listQuery.select;
+        this.getList();
       },
       handleSizeChange(val) {
         //改变每页数量

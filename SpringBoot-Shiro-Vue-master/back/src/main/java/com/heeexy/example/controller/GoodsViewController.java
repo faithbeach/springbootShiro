@@ -18,6 +18,7 @@ public class GoodsViewController {
     @GetMapping("/viewGoods")
     public JSONObject getGoods(HttpServletRequest request){
         JSONObject request2Json = CommonUtil.request2Json(request);
+        CommonUtil.getAllStringTrimed(request2Json,"searchText");
         return goodsViewService.viewGoods(request2Json);
     }
 

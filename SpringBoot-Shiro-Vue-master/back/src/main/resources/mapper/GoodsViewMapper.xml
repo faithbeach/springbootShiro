@@ -11,7 +11,16 @@
             FROM
                 goods_manage m
             WHERE m.delete_status = "1"
-            ORDER BY m.goods_price) b
+            <if test="select!='全部'">
+                AND	m.goods_category_id IN (
+                SELECT id
+                FROM goods_category
+                WHERE category_name=#{select})
+            </if>
+            <if test="searchText!=''">
+                AND (m.goods_name LIKE CONCAT("%",#{searchText},"%")
+                OR  m.goods_brief LIKE CONCAT("%",#{searchText},"%"))
+            </if>) b
     </select>
     <select id="listGoods" resultType="com.alibaba.fastjson.JSONObject">
         SELECT
@@ -27,7 +36,32 @@
             goods_manage m
         JOIN business b ON m.business_id=b.user_id
         WHERE m.delete_status = "1"
+        <if test="select!='全部'">
+            AND	m.goods_category_id IN (
+                SELECT id
+                FROM goods_category
+                WHERE category_name=#{select})
+        </if>
+        <if test="searchText!=''">
+            AND (m.goods_name LIKE CONCAT("%",#{searchText},"%")
+            OR  m.goods_brief LIKE CONCAT("%",#{searchText},"%"))
+        </if>
         ORDER BY m.goods_price
         LIMIT #{offSet}, #{pageRow}
+    </select>
+    <select id="listCategory" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+                c.category_name     		categoryName,
+                COUNT(c.category_name)	    number
+        FROM
+                goods_manage m
+        JOIN goods_category c ON m.goods_category_id = c.id
+        WHERE m.delete_status = "1"
+        <if test="searchText!=''">
+            AND (m.goods_name LIKE CONCAT("%",#{searchText},"%")
+            OR  m.goods_brief LIKE CONCAT("%",#{searchText},"%"))
+        </if>
+        GROUP BY
+                c.category_name
     </select>
 </mapper>

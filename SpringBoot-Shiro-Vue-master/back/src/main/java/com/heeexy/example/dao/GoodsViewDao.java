@@ -10,4 +10,6 @@ public interface GoodsViewDao {
     int countGoods(JSONObject requestJson);
 
     List<JSONObject> listGoods(JSONObject requestJson);
+
+    List<JSONObject> listCategory(JSONObject requestJson);
 }
