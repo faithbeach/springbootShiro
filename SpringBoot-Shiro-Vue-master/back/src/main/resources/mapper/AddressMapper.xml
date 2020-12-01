@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.heeexy.example.dao.AddressDao">
+    <insert id="addAddress">
+        INSERT INTO
+            customer_address(created_by,updated_by,delete_status,customer_id,customer_name,customer_address,customer_phone_number,default_address)
+        VALUE
+            (#{userId},#{userId},1,#{userId},#{name},#{address},#{phone},1)
+    </insert>
+    <update id="updateAddress">
+        UPDATE customer_address
+        SET
+            updated_by=#{userId},
+            customer_name=#{name},
+            customer_address=#{address},
+            customer_phone_number=#{phone}
+        WHERE
+            customer_id = #{userId} AND id = #{id};
+        <if test="defaultAddress==2">
+            UPDATE customer_address
+            SET
+                default_address = 1
+            WHERE
+                customer_id = #{userId};
+            UPDATE customer_address
+            SET
+                default_address = 2
+            WHERE
+                id = #{id};
+        </if>
+
+    </update>
+    <update id="deleteAddress">
+        UPDATE customer_address
+        SET
+            delete_status = 2
+        WHERE
+            customer_id = #{userId} AND id = #{id};
+    </update>
+
+
+    <select id="countAddress" resultType="java.lang.Integer">
+        SELECT
+            COUNT(1)
+        FROM
+            (SELECT
+                *
+            FROM
+                customer_address
+            WHERE
+                customer_id = #{userId} AND delete_status = 1) b
+    </select>
+    <select id="listAddress" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            id                          id,
+            customer_name               name,
+            customer_address            address,
+            customer_phone_number       phone,
+            default_address             defaultAddress
+        FROM
+            customer_address
+        WHERE
+            customer_id = #{userId} AND delete_status = 1
+        ORDER BY
+            defaultAddress DESC
+    </select>
+</mapper>

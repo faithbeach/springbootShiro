@@ -55,6 +55,7 @@ public class ShiroConfiguration {
 		filterChainDefinitionMap.put("/goodsManage/**", "anon");
 		filterChainDefinitionMap.put("/goods/**", "anon");
 		filterChainDefinitionMap.put("/viewBusiness/**", "anon");
+		filterChainDefinitionMap.put("/address/**", "anon");
 
 		filterChainDefinitionMap.put("/**", "authc");
 		shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);

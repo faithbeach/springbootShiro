@@ -78,6 +78,13 @@ export const asyncRouterMap = [
         menu: 'viewGoods'
       },
       {
+        path: 'customerAddress',
+        name: '地址管理',
+        component: _import('information/customer/customerAddress'),
+        meta: {title: '地址管理', icon: 'example'},
+        menu: 'customerAddress'
+      },
+      {
         path: 'customerInfo',
         name: '顾客信息',
         component: _import('information/customer'),

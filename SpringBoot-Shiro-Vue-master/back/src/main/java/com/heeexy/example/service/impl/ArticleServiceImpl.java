@@ -26,6 +26,7 @@ public class ArticleServiceImpl implements ArticleService {
 	@Override
 	@Transactional(rollbackFor = Exception.class)
 	public JSONObject addArticle(JSONObject jsonObject) {
+
 		articleDao.addArticle(jsonObject);
 		return CommonUtil.successJson();
 	}
