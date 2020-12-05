@@ -10,13 +10,13 @@
           <el-button type="primary" icon="plus" @click="getList()" v-if="hasPerm('viewGoods:list')">查 询
           </el-button>
         </el-form-item>
-        <el-form-item label="商品类型" prop="categoryName">
+        <el-form-item label="商品类型" prop="businessId">
           <el-select v-model="listQuery.select" placeholder="请选择" @change="getCategoryGoods()">
             <el-option
               v-for="item in categoryList"
-              :key="item.categoryName"
-              :label="item.categoryName"
-              :value="item.categoryName">
+              :key="item.businessId"
+              :label="item.businessId"
+              :value="item.businessId">
             </el-option>
           </el-select>
         </el-form-item>
@@ -49,7 +49,7 @@
       <el-table-column align="center" label="操作" width="200" v-if="hasPerm('viewGoods:update')">
         <template slot-scope="scope" >
           <el-button type="primary" icon="edit" @click="showUpdate(scope.$index)">加 购</el-button>
-          <el-button type="danger" icon="edit" @click="showDelete(scope.$index)">购 买</el-button>
+          <el-button type="danger" icon="edit" @click="showPurchase(scope.$index)">购 买</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -62,28 +62,51 @@
       :page-sizes="[10, 20, 50, 100]"
       layout="total, sizes, prev, pager, next, jumper">
     </el-pagination>
-    <!-- <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
-      <el-form v-if="dialogStatus=='create'||dialogStatus=='update'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
+    <el-dialog :title="textMap[dialogStatus]" :visible.sync="dialogFormVisible">
+      <el-form v-if="dialogStatus=='purchase'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
               style='width: 600px; margin-left:50px;'>
-        <el-form-item label="名称" prop="categoryName">
-          <el-input type="text" v-model="tempTable.categoryName" style="width: 250px;">
+        <el-form-item>
+          <p style="width: 250px;">商店名称&emsp;&emsp;{{tempTable.businessName}}</p>
+          <p style="width: 250px;">商品名称&emsp;&emsp;{{tempTable.goodsName}}</p>
+          <p style="width: 250px;">单价(元)&emsp;&emsp;&nbsp;{{tempTable.goodsPrice}}</p>
+          <p style="width: 250px;">库存(个)&emsp;&emsp;&nbsp;{{tempTable.goodsNumbers}}</p>
+          <p>购买数量&emsp;&emsp;<el-input-number size="mini" v-model="tempTable.numbers" :min="1" :max="tempTable.goodsNumbers"></el-input-number></p>
+          <p style="width: 600px;" >收货地址&emsp;&emsp;
+            <el-select v-model="tempTable.addressId" placeholder="请选择" size="medium">
+              <el-option
+                v-for="item in addressList"
+                :key="item.id"
+                :label="item.name+' '+item.address+' '+item.phone"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </p>
+          <p style="width: 250px;">总价(元)&emsp;&emsp;&nbsp;{{tempTable.goodsPrice*tempTable.numbers}}</p>
+          <p style="width: 250px;">备注信息&emsp;&emsp;
+            <el-input type="textarea" :autosize="{ minRows: 2, maxRows: 4}" 
+            placeholder="给商家留言" v-model="tempTable.customerComment" style="width: 250px;"/></p>
+        </el-form-item>
+      </el-form>
+      <!-- <el-form v-if="dialogStatus=='create'||dialogStatus=='update'" class="small-spacemenu" :model="tempTable" ref="tempTable" label-position="left" label-width="100px"
+              style='width: 600px; margin-left:50px;'>
+        <el-form-item label="名称" prop="businessId">
+          <el-input type="text" v-model="tempTable.businessId" style="width: 250px;">
           </el-input>
         </el-form-item>
-        <el-form-item label="简介" prop="categoryBrief">
-          <el-input type="text" v-model="tempTable.categoryBrief" style="width: 250px;">
+        <el-form-item label="简介" prop="goodsId">
+          <el-input type="text" v-model="tempTable.goodsId" style="width: 250px;">
           </el-input>
         </el-form-item>
         <p style="color:#848484;" v-if="dialogStatus=='create'"><font color="#ff0000">*</font>为新增类目的必填信息</p>
         <p style="color:#848484;" v-else><font color="#ff0000">*</font>为更新类目的必填信息</p>
-      </el-form>
-      <el-h3 v-if="dialogStatus=='delete'">确认删除?</el-h3>
+      </el-form> -->
+      <!-- <p v-if="dialogStatus=='delete'">确认删除?</p> -->
       <div slot="footer" class="dialog-footer">
+        <el-button  type="success" @click="toPurchase(2)">购 买</el-button>
+        <el-button  type="success" @click="toPurchase(1)" icon="el-icon-shopping-cart-1">加入购物车</el-button>
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button v-if="dialogStatus=='create'" type="success" @click="createCategory">创 建</el-button>
-        <el-button v-else-if="dialogStatus=='update'" type="success" @click="updateCategory">更 新</el-button>
-        <el-button type="danger" v-else @click="deleteCategory">删 除</el-button>
       </div>
-    </el-dialog> -->
+    </el-dialog>
   </div>
 </template>
 <script>
@@ -92,12 +115,17 @@
       return {
         totalCount: 0, //分页组件--数据总条数
         list: [],//表格的数据
+        addressList: [],
         listLoading: false,//数据加载等待动画
         listQuery: {
           pageNum: 1,//页码
           pageRow: 10,//每页条数
           searchText: "",
           select: "",
+        },
+        listAddressQuery: {
+          pageNum: 1,//页码
+          pageRow: 20,//每页条数
         },
         temp: {
           select: "全部",
@@ -107,12 +135,20 @@
         textMap: {
           update: '编辑类目',
           create: '创建类目',
-          delete: '删除类目'
+          delete: '删除类目',
+          purchase: '购买商品'
         },
         tempTable: {
-          categoryBrief: "",
-          categoryName: "",
-          id:"",
+          goodsId: "",      //商品ID
+          businessId: "",   //商店ID
+          addressId: "",    //地址ID
+          businessName: "", //商店名
+          goodsName: "",    //商品名
+          goodsPrice: "",   //单价
+          numbers: "",      //购买数量
+          goodsNumbers: "", //库存
+          customerComment: "",//备注信息
+          plan: "",         // 1、下单不支付  2、下单并支付
         },
         categoryList: [],
       }
@@ -141,6 +177,22 @@
           this.totalCount = data.totalCount;
         })
       },
+      getAddressList() {
+        //查询列表
+        if (!this.hasPerm('customerAddress:list')) {
+          return
+        }
+        this.listLoading = true;
+        this.api({
+          url: "/address/listAddress",
+          method: "get",
+          params: this.listAddressQuery
+        }).then(data => {
+          this.listLoading = false;
+          this.addressList = data.list;
+          this.tempTable.addressId = this.addressList[0].id;
+        })
+      },
       getCategoryGoods(){
         this.temp.select = this.listQuery.select;
         this.getList();
@@ -166,36 +218,44 @@
       },
       showCreate() {
         //显示新增对话框
-        this.tempTable.categoryName = "";
-        this.tempTable.categoryBrief = "";
+
+        this.tempTable.businessId = "";
+        this.tempTable.goodsId = "";
         this.tempTable.id = "";
         this.dialogStatus = "create";
         this.dialogFormVisible = true;
       },
-      showDelete($index) {
-        //显示删除对话框
-        this.tempTable.id = this.list[$index].id;
-        this.dialogStatus = "delete";
+      showPurchase($index) {
+        this.getAddressList();//里面给id赋了值
+        this.tempTable.goodsId = this.list[$index].goodsId;
+        this.tempTable.businessId = this.list[$index].businessId;
+        this.tempTable.goodsPrice = this.list[$index].goodsPrice;
+        this.tempTable.businessName = this.list[$index].businessName;
+        this.tempTable.goodsName = this.list[$index].goodsName;
+        this.tempTable.goodsNumbers = this.list[$index].goodsNumbers;
+        this.tempTable.numbers = 1;
+        this.dialogStatus = "purchase";
         this.dialogFormVisible = true
       },
       showUpdate($index) {
         //显示修改对话框
-        this.tempTable.categoryBrief = this.list[$index].categoryBrief;
-        this.tempTable.categoryName = this.list[$index].categoryName;
+        this.tempTable.goodsId = this.list[$index].goodsId;
+        this.tempTable.businessId = this.list[$index].businessId;
         this.tempTable.id = this.list[$index].id;
         this.dialogStatus = "update";
         this.dialogFormVisible = true
       },
-      createCategory() {
+      toPurchase(planNumber) {
         //保存新菜单
+        this.tempTable.plan = planNumber;
         this.api({
-          url: "/goodsCategory/addCategory",
+          url: "/order/buyOneType",
           method: "post",
           data: this.tempTable
         }).then(() => {
           this.getList();
           this.dialogFormVisible = false;
-          this.$message.success("类目添加成功");
+          this.$message.success("下单成功");
         });
       },
       updateCategory() {

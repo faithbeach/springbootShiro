@@ -8,8 +8,10 @@ import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 
 import javax.servlet.http.HttpServletRequest;
+import java.math.BigInteger;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author: hxy
@@ -228,5 +230,32 @@ public class CommonUtil {
 				throw new CommonJsonException(jsonObject);
 			}
 		}
+	}
+
+	/**
+	 * 获取UUID
+	 * */
+	public static String getUUID(){
+		return UUID.randomUUID().toString().replace("-","").toLowerCase();
+	}
+	/**
+	 * 获取UUID
+	 * */
+	public static String getDecUUID(){
+		return hexToDec(getUUID());
+	}
+	/**
+	 * 十进制转化为十六进制
+	 * */
+	public static String decToHex(String dec) {
+		BigInteger data = new BigInteger(dec, 10);
+		return data.toString(16);
+	}
+	/**
+	 * 十六进制转化为十进制
+	 * */
+	public static String hexToDec(String hex) {
+		BigInteger data = new BigInteger(hex, 16);
+		return data.toString(10);
 	}
 }

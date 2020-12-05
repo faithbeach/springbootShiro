@@ -28,6 +28,7 @@
             m.id					                        goodsId,
             m.goods_price		                            goodsPrice,
             m.goods_brief		                            goodsBrief,
+            m.goods_numbers                                 goodsNumbers,
             m.business_id		                            businessId,
             b.business_name	                                businessName,
             TIME_FORMAT(b.business_open_time,"%H:%i")       openTime,
@@ -63,5 +64,38 @@
         </if>
         GROUP BY
                 c.category_name
+    </select>
+    <select id="getGoodsInfoById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            m.id                                            goodsId,
+            m.goods_name		                            goodsName,
+            m.goods_price		                            goodsPrice,
+            m.goods_numbers                                 goodsNumbers,
+            m.goods_sale_status                             saleStatus,
+            c.category_name                                 categoryName
+        FROM
+            goods_manage m
+        LEFT JOIN goods_category c ON c.id = m.goods_category_id
+        WHERE
+            m.id = #{goodsId} AND m.delete_status = 1
+    </select>
+    <select id="getCustomerInfoById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            customer_balance        balance,
+            user_id                 customerId
+        FROM
+            customer
+        WHERE
+            user_id = #{userId} AND delete_status = 1
+    </select>
+    <select id="getAddressInfoById" resultType="com.alibaba.fastjson.JSONObject">
+        SELECT
+            customer_name           name,
+            customer_address        address,
+            customer_phone_number   phone
+        FROM
+            customer_address
+        WHERE
+            id = #{addressId}
     </select>
 </mapper>
