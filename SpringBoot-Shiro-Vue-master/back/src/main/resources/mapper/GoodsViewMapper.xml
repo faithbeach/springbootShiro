@@ -32,7 +32,9 @@
             m.business_id		                            businessId,
             b.business_name	                                businessName,
             TIME_FORMAT(b.business_open_time,"%H:%i")       openTime,
-            TIME_FORMAT(b.business_close_time,"%H:%i")      closeTime
+            TIME_FORMAT(b.business_close_time,"%H:%i")      closeTime,
+            IF(CURRENT_TIME() BETWEEN b.business_open_time AND b.business_close_time,"营业中","打烊了") status,
+            IF(CURRENT_TIME() BETWEEN b.business_open_time AND b.business_close_time,2,1) statusCode
         FROM
             goods_manage m
         JOIN business b ON m.business_id=b.user_id
@@ -47,7 +49,7 @@
             AND (m.goods_name LIKE CONCAT("%",#{searchText},"%")
             OR  m.goods_brief LIKE CONCAT("%",#{searchText},"%"))
         </if>
-        ORDER BY m.goods_price
+        ORDER BY statusCode DESC,m.goods_price
         LIMIT #{offSet}, #{pageRow}
     </select>
     <select id="listCategory" resultType="com.alibaba.fastjson.JSONObject">

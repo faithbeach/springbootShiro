@@ -39,8 +39,7 @@
         </router-link>
         </template>
       </el-table-column>
-      <el-table-column align="center" prop="openTime" label="营业状态" style="width: 90px;"></el-table-column>
-      <el-table-column align="center" prop="closeTime" label="营业状态" style="width: 90px;"></el-table-column>
+      <el-table-column align="center" prop="status" label="营业状态" style="width: 90px;"></el-table-column>
       <!-- <el-table-column align="center" label="创建时间" width="170">
         <template slot-scope="scope">
           <span>{{scope.row.createTime}}</span>
