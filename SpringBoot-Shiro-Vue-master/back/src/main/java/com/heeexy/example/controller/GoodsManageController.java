@@ -5,6 +5,7 @@ import com.heeexy.example.service.GoodsManageService;
 import com.heeexy.example.util.CommonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -43,5 +44,11 @@ public class GoodsManageController {
         CommonUtil.getAllStringTrimed(requestJson,"name");
         CommonUtil.hasAllRequiredString(requestJson, "name");
         return goodsManageService.addGoods(requestJson);
+    }
+
+    @RequestMapping("/batchAddGoods")
+    public JSONObject batchAddGoods(@RequestBody MultipartFile file){
+
+        return goodsManageService.batchAddGoods(file);
     }
 }

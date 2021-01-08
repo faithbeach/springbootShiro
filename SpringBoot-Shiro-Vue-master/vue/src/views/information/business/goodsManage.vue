@@ -5,13 +5,17 @@
         <el-form-item>
           <el-input type="text" v-model="listQuery.search" style="width: 250px;" placeholder="请输入查询内容">
           </el-input>
-          </el-form-item>
-          <el-form-item>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" icon="plus" @click="getList" v-if="hasPerm('goodsManage:list')">查 询
           </el-button>
-          </el-form-item>
-          <el-form-item>
+        </el-form-item>
+        <el-form-item>
           <el-button type="primary" icon="plus" @click="showCreate" v-if="hasPerm('goodsManage:add')">新 增
+          </el-button>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="plus" @click="showBatchCreate" v-if="hasPerm('goodsManage:add')">批量上传
           </el-button>
         </el-form-item>
       </el-form>
@@ -87,11 +91,27 @@
         </el-form-item>
       </el-form>
       <el v-if="dialogStatus=='delete'">确认删除?</el>
+
+          <el-upload v-if="dialogStatus=='batchCreate'"
+            drag
+            ref="upload"
+            action=""
+            :auto-upload='true'
+            :multiple='false'
+            :http-request="uploadFile"
+            limit="1"
+            :on-success="addSuccess"
+            accept="*">
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">只能上传excel文件</div>
+          </el-upload>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
         <el-button v-if="dialogStatus=='create'" type="success" @click="createGoods">创 建</el-button>
         <el-button v-else-if="dialogStatus=='update'" type="success" @click="updateGoods">更 新</el-button>
-        <el-button type="danger" v-else @click="deleteGoods">删 除</el-button>
+        <el-button type="danger" v-else-if="dialogStatus=='delete'" @click="deleteGoods">删 除</el-button>
       </div>
     </el-dialog>
   </div>
@@ -116,9 +136,10 @@
         dialogStatus: 'create',
         dialogFormVisible: false,
         textMap: {
-          update: '编辑类目',
-          create: '创建类目',
-          delete: '删除类目'
+          update: '编辑商品',
+          create: '创建商品',
+          delete: '删除商品',
+          batchCreate: '批量添加'
         },
         tempTable: {
           name: "",
@@ -168,6 +189,20 @@
           this.list = data.list;
           this.statusList = data.statusList;
           this.totalCount = data.totalCount;
+        })
+      },
+      uploadFile(item){
+        this.$refs.upload.clearFiles();
+        var fileObj = item.file;
+        var form = new FormData();
+        form.append('file',fileObj);
+        this.api.post('/goodsManage/batchAddGoods',form,{
+          'Content-Type':'multipart/form-data'
+        }).then(res=> {
+          this.$message.success("上传成功");
+          this.dialogFormVisible = false;
+        }).catch(() => {
+          this.$message.error();("上传失败");
         })
       },
       handleSizeChange(val) {
@@ -224,6 +259,14 @@
         this.tempTable.id = this.list[$index].id;
         this.dialogStatus = "update";
         this.dialogFormVisible = true
+      },
+      showBatchCreate(){
+        this.dialogStatus = "batchCreate";
+        this.dialogFormVisible = true
+      },
+      addSuccess(param){
+        console.log(param)
+        console.log("123")
       },
       createGoods() {
         //保存新菜单
